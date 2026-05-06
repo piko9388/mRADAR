@@ -3,7 +3,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <title>m-RADAR · Material Risk Alert · Detection · Aggregated Reporting</title>
 <style>
 /* Option B Theme — 모노크롬 + 오렌지 액센트 */
@@ -22,7 +22,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{font-family:'Trebuchet MS','Apple SD Gothic Neo','Malgun Gothic',sans-serif;}
-body{min-height:100vh;background:var(--bg);color:var(--tx-primary);font-size:13px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+body{min-height:100vh;background:var(--bg);color:var(--tx-primary);font-size:13px;line-height:1.55;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 
 #header{background:var(–bg-card);border-bottom:1px solid var(–bd);padding:12px 24px 0;position:sticky;top:0;z-index:200;}
 .hd-row1{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding-bottom:10px;}
@@ -321,10 +321,90 @@ padding:2px 6px;border-radius:3px;color:#fff;font-size:10px;
 #footer{text-align:center;padding:24px 20px;font-size:9px;color:var(–tx-muted);letter-spacing:1px;text-transform:uppercase;font-family:‘Trebuchet MS’,sans-serif;}
 
 @media (max-width:768px){
-#execBar{grid-template-columns:1fr;gap:12px;}
-.heatmap{grid-template-columns:60px repeat(7,1fr);font-size:9px;}
-.card{grid-template-columns:36px 1fr;}
-.card-action{grid-column:1/-1;flex-direction:row;justify-content:flex-end;}
+/* 헤더 압축 */
+#header{padding:8px 12px 0;}
+.hd-row1{padding-bottom:6px;gap:8px;}
+.brand{gap:8px;}
+.brand-mark{width:28px;height:28px;}
+.brand-name{font-size:13px;}
+.brand-sub{display:none;}  /* 모바일에서 부제 숨김 */
+.hd-meta{gap:8px;flex:1;justify-content:flex-end;}
+.hd-status{display:none;}  /* 모바일에서 상태 텍스트 숨김 (live-pill만 유지) */
+.live-pill{padding:3px 7px;font-size:9px;}
+.hd-actions{gap:4px;width:100%;justify-content:flex-end;flex-wrap:wrap;}
+.btn-mini{padding:4px 7px;font-size:10px;}
+
+/* Main 영역 */
+#main{padding:12px 12px 50px;}
+
+/* View Toggle */
+#viewToggleBar{gap:4px;margin-bottom:8px;}
+.view-toggle{padding:5px 10px;font-size:10px;}
+
+/* Exec Bar — 1열 + 통계 가로 컴팩트 */
+#execBar{grid-template-columns:1fr;gap:10px;padding:10px 12px;}
+.exec-level{flex-direction:row;align-items:center;gap:10px;}
+.exec-label{font-size:8px;}
+.exec-level-val{font-size:16px;}
+.exec-stats{gap:6px;}
+.exec-stat{padding:4px 2px;}
+.exec-stat .num{font-size:15px;}
+.exec-stat .lbl{font-size:8px;letter-spacing:.3px;}
+.exec-action{flex-direction:row;justify-content:space-between;align-items:center;}
+.exec-time{font-size:9px;}
+
+/* 섹션 헤더 */
+.section-head{margin-bottom:8px;}
+.section-title{font-size:11px;}
+.section-meta{font-size:9px;}
+#heatmapWrap,#bpViewWrap,#listSection{padding:10px 12px;margin-bottom:10px;}
+
+/* Heatmap 모바일 — 행 헤더 좁게, 셀 작게 */
+.heatmap{grid-template-columns:50px repeat(7,1fr);gap:2px;font-size:8px;}
+.hm-col-head,.hm-row-head{font-size:8px;padding:3px 1px;}
+.hm-row-head{padding:4px 4px 4px 1px;}
+.hm-cell{font-size:9px;}
+.hm-cell .ct{font-size:7px;}
+
+/* BP View 카드 그리드 — 모바일 2열 */
+.bp-filter-tabs{gap:3px;margin-bottom:8px;padding-bottom:6px;}
+.bp-mat-tab{padding:3px 8px;font-size:10px;}
+.bp-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:5px;}
+.bp-card{padding:6px 8px;min-height:110px;gap:3px;}
+.bp-name{font-size:11px;}
+.bp-mat-tag,.bp-reg-tag{font-size:8px;padding:1px 4px;}
+.bp-sites{font-size:8px;}
+.bp-sig-num{font-size:13px;}
+
+/* 뉴스 카드 */
+.card{grid-template-columns:32px 1fr;gap:8px;padding:8px 10px;}
+.card-action{grid-column:1/-1;flex-direction:row;justify-content:flex-end;align-self:auto;padding-top:4px;}
+.card-score{padding:3px 0;}
+.score-num{font-size:14px;}
+.card-title{font-size:12px;}
+.card-summary{font-size:10px;padding:4px 8px;}
+
+/* 카테고리 탭 */
+.cat-tab{padding:3px 9px;font-size:10px;}
+
+/* 소스 바 모바일에서 숨김 (정보 과다) */
+#srcBar{display:none;}
+
+/* 모달 모바일 */
+.modal{max-width:96vw;}
+.modal-head{padding:12px 16px;}
+.modal-body{padding:12px 16px;}
+.modal-foot{padding:8px 16px;}
+}
+
+@media (max-width:420px){
+/* 초소형 화면 추가 압축 */
+.hd-actions{gap:3px;}
+.btn-mini{padding:3px 6px;font-size:9px;}
+.exec-stat .num{font-size:13px;}
+.heatmap{grid-template-columns:42px repeat(7,1fr);font-size:7px;}
+.hm-cell{font-size:8px;}
+.bp-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));}
 }
 </style>
 
@@ -641,18 +721,26 @@ const PROXIES = [
   u => `https://thingproxy.freeboard.io/fetch/${u}`,
 ];
 
+// Promise.race 헬퍼 — AbortController 무시되는 환경(iOS Safari) 안전망
+function withTimeout(promise, ms, label){
+  return Promise.race([
+    promise,
+    new Promise((_, rej) => setTimeout(() => rej(new Error("timeout:"+(label||ms))), ms))
+  ]);
+}
+
 async function fetchRSS(url){
   try{
     const c = new AbortController(); setTimeout(() => c.abort(), 5000);
-    const r = await fetch(url, {signal: c.signal});
-    if(r.ok){ const t = await r.text(); if(t.includes("<item>") || t.includes("<entry>")) return t; }
+    const r = await withTimeout(fetch(url, {signal: c.signal}), 6000, "direct");
+    if(r.ok){ const t = await withTimeout(r.text(), 3000, "text"); if(t.includes("<item>") || t.includes("<entry>")) return t; }
   }catch(_){}
   for(const pf of PROXIES){
     try{
-      const c = new AbortController(); setTimeout(() => c.abort(), 8000);
-      const r = await fetch(pf(url), {signal: c.signal});
+      const c = new AbortController(); setTimeout(() => c.abort(), 7000);
+      const r = await withTimeout(fetch(pf(url), {signal: c.signal}), 8000, "proxy");
       if(!r.ok) continue;
-      const t = await r.text();
+      const t = await withTimeout(r.text(), 3000, "proxy-text");
       if(t.includes("<item>") || t.includes("<entry>") || t.includes("<channel>")) return t;
     }catch(_){}
   }
@@ -834,26 +922,25 @@ ${list}`;
 // SECTION 11 : 공식 API 교차검증
 // ═══════════════════════════════════
 async function fetchOfficialEarthquakes(){
-  // USGS Significant Week (Mw ~4.5+)
+  // USGS Significant Week (Mw ~4.5+) — Promise.race timeout 보장
   try{
     const url = OFFICIAL_APIS[0].url;
-    const c = new AbortController(); setTimeout(() => c.abort(), 6000);
-    const r = await fetch(url, {signal: c.signal});
+    const c = new AbortController(); setTimeout(() => c.abort(), 5000);
+    const r = await withTimeout(fetch(url, {signal: c.signal}), 6000, "usgs-direct");
     if(!r.ok){
-      // CORS 실패 시 프록시 fallback
       for(const pf of PROXIES){
         try{
-          const c2 = new AbortController(); setTimeout(() => c2.abort(), 8000);
-          const r2 = await fetch(pf(url), {signal: c2.signal});
+          const c2 = new AbortController(); setTimeout(() => c2.abort(), 7000);
+          const r2 = await withTimeout(fetch(pf(url), {signal: c2.signal}), 8000, "usgs-proxy");
           if(r2.ok){
-            const t = await r2.text();
+            const t = await withTimeout(r2.text(), 3000, "usgs-text");
             return parseUsgsAtom(t);
           }
         }catch(_){}
       }
       return [];
     }
-    const t = await r.text();
+    const t = await withTimeout(r.text(), 3000, "usgs-text");
     return parseUsgsAtom(t);
   }catch(_){ return []; }
 }
@@ -957,6 +1044,26 @@ async function startFetch(){
   setBtn(true); setDot("loading"); setStatus("RSS 수집 중...");
   showLoading();
 
+  // 글로벌 90초 강제 종료 (AbortController가 작동 안 하는 환경 대비)
+  const globalTimeout = setTimeout(() => {
+    if(isLoading){
+      isLoading = false;
+      setBtn(false);
+      setDot("error");
+      setStatus("⏱ 수집 시간 초과 (90초). 캐시된 결과만 표시됩니다.", true);
+      // 화면에 캐시된 데이터 표시
+      const cached = loadDB();
+      if(cached.length > 0){
+        allNews = cached;
+        renderAll();
+        document.getElementById("stateScreen").style.display = "none";
+        document.getElementById("newsList").style.display = "flex";
+      } else {
+        showError("⏱ 수집 시간 초과 (90초)");
+      }
+    }
+  }, 90000);
+
   try{
     const seen = new Set(), collected = [], srcResult = {};
     let done = 0;
@@ -986,6 +1093,7 @@ async function startFetch(){
     const officialEqs = await fetchOfficialEarthquakes();
 
     if(collected.length === 0){
+      clearTimeout(globalTimeout);
       showError("RSS 수집 실패. 네트워크 상태를 확인하세요.");
       return;
     }
@@ -1105,8 +1213,10 @@ async function startFetch(){
     setStatus(msg); setDot("ok"); setUpdate();
 
   }catch(e){
+    clearTimeout(globalTimeout);
     showError(`오류: ${e.message}`);
   }finally{
+    clearTimeout(globalTimeout);
     isLoading = false;
     setBtn(false);
   }
@@ -1511,7 +1621,7 @@ function renderInfoModal(){
     </div>
 
     <div style="background:var(--bg-dark);color:var(--tx-inv);padding:16px 20px;border-radius:8px;margin-bottom:14px;">
-      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin-bottom:4px;">m-RADAR v1.1.1</div>
+      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin-bottom:4px;">m-RADAR v1.1.3</div>
       <div style="font-size:16px;font-weight:800;letter-spacing:.3px;">Material Risk Alert · Detection · Aggregation</div>
       <div style="font-size:10px;color:#999;margin-top:4px;">소재 공급망 외부 리스크 조기감지 시스템</div>
     </div>
@@ -1597,11 +1707,13 @@ function renderInfoModal(){
         <tr style="background:var(--bg-soft);"><th style="padding:4px 8px;text-align:left;color:var(--tx-secondary);font-weight:700;">버전</th><th style="padding:4px 8px;text-align:left;color:var(--tx-secondary);font-weight:700;">개선 내용</th></tr>
         <tr><td style="padding:4px 8px;border-bottom:1px solid var(--bd);font-weight:600;white-space:nowrap;">v1.0</td><td style="padding:4px 8px;border-bottom:1px solid var(--bd);">Option B 테마 + Risk Score 100점 + Material×Region Heatmap + 신뢰도 ●◐○ + Source A/B/C/D 등급 + USGS 공식 API 실연동(JMA/NOAA 확장 예정) + Geo-Spatial Dedup + Few-shot AI 학습</td></tr>
         <tr><td style="padding:4px 8px;border-bottom:1px solid var(--bd);font-weight:600;white-space:nowrap;">v1.1.1</td><td style="padding:4px 8px;border-bottom:1px solid var(--bd);">BP Master 96개 통합 + BP View 탭 + Heatmap 셀 → BP 명단 모달 + 외부 JSON fetch 우선 / 인라인 fallback + PUBLIC_MODE 보안 분리 + validateDependencies 안전망</td></tr>
+        <tr><td style="padding:4px 8px;border-bottom:1px solid var(--bd);font-weight:600;white-space:nowrap;">v1.1.2</td><td style="padding:4px 8px;border-bottom:1px solid var(--bd);">모바일 반응형 전면 강화 (헤더 압축·exec 1열·Heatmap 작은 셀·BP 그리드 2열·iOS Safari 자동확대 차단). 768px / 420px 미디어쿼리 2단계.</td></tr>
+        <tr><td style="padding:4px 8px;border-bottom:1px solid var(--bd);font-weight:600;white-space:nowrap;">v1.1.3</td><td style="padding:4px 8px;border-bottom:1px solid var(--bd);">무한로딩 핫픽스: Promise.race 강제 timeout(iOS Safari AbortController 우회) + startFetch 90초 글로벌 종료 + 자동 fetch 비활성화(신규 진입 시 명시적 [수집 시작] 버튼) + 빈 상태 안내 화면.</td></tr>
       </table>
     </div>
 
     <div style="font-size:9px;color:var(--tx-muted);text-align:center;padding-top:12px;border-top:1px solid var(--bd);margin-top:12px;letter-spacing:.5px;">
-      m-RADAR v1.1.1 · Single Page Build · localStorage Cache · Cloudflare Workers Compatible
+      m-RADAR v1.1.3 · Single Page Build · localStorage Cache · Cloudflare Workers Compatible
     </div>
   `;
 }
@@ -1931,15 +2043,34 @@ if(saved.length > 0){
 } else {
   renderExecBar();
   renderHeatmap();
+  // 빈 상태에서 명확한 안내 표시
+  const ss = document.getElementById("stateScreen");
+  if(ss){
+    ss.innerHTML = `
+      <div class="state-icon">📡</div>
+      <div class="state-msg">수집된 시그널이 없습니다</div>
+      <div style="margin-top:14px;font-size:11px;color:var(--tx-tertiary);line-height:1.6;">
+        ${getApiKey() ? "" : "AI 검증을 위해 헤더의 <b>[API 키]</b> 등록 후<br>"}
+        우측 상단 <b>[새로고침]</b> 버튼을 눌러 RSS 수집을 시작하세요
+      </div>
+      <div style="margin-top:12px;"><button class="btn btn-primary" onclick="startFetch()">▶ 지금 수집 시작</button></div>
+    `;
+    ss.style.display = "block";
+  }
+  setDot("ok");
+  setStatus(getApiKey() ? "준비됨 · API 키 ✓" : "API 키 미설정 · RSS만 수집 가능");
 }
 
-// 자동 fetch
-if(getApiKey() || saved.length === 0){
-  startFetch();
+// 자동 fetch — API 키 있고 캐시 있을 때만 백그라운드 갱신
+// (신규 진입 시 무한로딩 방지)
+if(getApiKey() && saved.length > 0){
+  setTimeout(() => { if(!isLoading) startFetch(); }, 1500);
 }
 
-// 30분 자동 갱신
-setInterval(() => { if(!isLoading) startFetch(); }, 30 * 60 * 1000);
+// 30분 자동 갱신 (API 키 있을 때만)
+setInterval(() => {
+  if(!isLoading && getApiKey()) startFetch();
+}, 30 * 60 * 1000);
 ```
 
 }catch(e){
