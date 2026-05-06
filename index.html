@@ -594,6 +594,233 @@ body{min-height:100vh;background:var(--bg);color:var(--tx-primary);font-size:13p
 <div id="toast"></div>
 
 <script>
+// ═══════════════════ v1.1.4 누락 복구: SECTION 1~5 ═══════════════════
+// ════════════════════════════════════════════════════════════
+// m-RADAR v1.1 — Material Risk Alert · Detection · Aggregation
+// 단일 HTML 운영 / Cloudflare Workers 프록시 호환 / GitHub Pages
+// v1.1 변경: BP Master 통합 + BP 매칭 로직 + BP View 모달
+// ════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════
+// SECTION 1 : 카테고리 정의
+// ═══════════════════════════════════
+const DEFAULT_CATS = [
+  {id:"파업",     icon:"✊", color:"#EA580C", kw:["파업","총파업","쟁의행위","노조 파업","항만 파업","물류 파업","화물연대","민노총","walkout","strike","port strike","dock strike","ストライキ","罢工"]},
+  {id:"화재",     icon:"🔥", color:"#DC2626", kw:["화재","산불","공장 화재","산업단지 화재","반도체 공장 화재","wildfire","factory fire","plant fire","blaze","火災","火灾"]},
+  {id:"홍수",     icon:"🌊", color:"#2563EB", kw:["홍수","침수","범람","수해","폭우 피해","수도권 침수","청주 폭우","집중호우","flood","flooding","inundation","洪水"]},
+  {id:"지진",     icon:"🌍", color:"#92400E", kw:["지진","강진","여진","진도","쓰나미","해일","경주 지진","포항 지진","동해 지진","earthquake","quake","seismic","tsunami","地震","津波","震度"]},
+  {id:"태풍",     icon:"🌀", color:"#7C3AED", kw:["태풍","폭풍","사이클론","허리케인","북상","상륙","typhoon","hurricane","cyclone","台风","台風"]},
+  {id:"전쟁",     icon:"⚔️", color:"#B91C1C", kw:["전쟁","공습","포격","침공","군사작전","북한 도발","미사일 발사","전투","폭격","airstrike","missile","bombardment","空襲","战争"]},
+  {id:"무역규제", icon:"🚫", color:"#D97706", kw:[
+    "관세","무역분쟁","관세 부과","무역전쟁","보복 관세","수출 금지","수출 중단","수출 통제","수출 규제",
+    "수입 금지","수입 규제","전략물자","화이트리스트","개별허가","경제 제재","제재 조치",
+    "희토류 규제","반도체 규제","갈륨 수출","게르마늄 수출","안티몬 규제","대중 제재","대한 제재",
+    "tariff","trade war","export ban","export control","entity list","sanctions","embargo",
+    "whitelist","strategic materials","rare earth ban","gallium export","germanium export","chip ban",
+    "輸出規制","輸出禁止","制裁","出口禁令","出口管制","稀土"
+  ]},
+  {id:"해상봉쇄", icon:"⚓", color:"#0E7490", kw:[
+    "봉쇄","해상봉쇄","해협 봉쇄","호르무즈","말라카","수에즈","해상 물류","해운 차질","항로 차단","나포",
+    "부산항 차질","인천항 차질","컨테이너 대란",
+    "blockade","strait of hormuz","hormuz","malacca","suez","maritime blockade","shipping disruption",
+    "ホルムズ","マラッカ","海上封鎖","封锁"
+  ]},
+  {id:"환율",     icon:"💱", color:"#059669", kw:["환율 급등","환율 급락","외환위기","환율 충격","원화 약세","원달러","currency crisis","forex shock","円高","円安","汇率"]},
+  {id:"화산",     icon:"🌋", color:"#C2410C", kw:["화산","용암","분화","화산재","volcano","eruption","噴火","火山"]},
+  {id:"우크라이나",icon:"🇺🇦", color:"#1D4ED8", kw:["우크라이나","키이우","젤렌스키","러시아군","ukraine","kyiv","zelensky"]},
+  {id:"이스라엘", icon:"🇮🇱", color:"#0369A1", kw:["이스라엘","가자지구","하마스","팔레스타인","네타냐후","israel","gaza","hamas","palestine"]},
+  {id:"폭발",     icon:"💥", color:"#DC2626", kw:["폭발 사고","폭탄","폭파","테러 폭발","explosion","blast","detonation","爆発","爆炸"]},
+  {id:"공급망위기",icon:"🔗", color:"#7C2D12", kw:[
+    "공급망 위기","공급망 충격","공급망 차질","공급 쇼크","원자재 폭등","원자재 부족","원자재 대란",
+    "황산 수출","황산 부족","불화수소","불산","포토레지스트","감광액","플루오린 폴리이미드","EUV 레지스트",
+    "네온가스","크립톤","크세논","헬륨 부족","갈륨","게르마늄","안티몬","텅스텐","팔라듐",
+    "슬러리 수급","CMP 수급","특수가스 수급","웨이퍼 수급","타겟 수급",
+    "전력 대란","정전","단수","용수 부족","반도체 소재","반도체 원자재","소재 수급","소재 부족","소재 대란",
+    "supply chain crisis","supply shock","supply disruption","raw material shortage",
+    "sulfuric acid","hydrogen fluoride","photoresist","fluorinated polyimide","neon gas",
+    "krypton","xenon","helium shortage","gallium","germanium","antimony","tungsten",
+    "wafer shortage","semiconductor material","blackout","power outage",
+    "硫酸","フッ化水素","フォトレジスト","ネオン","ヘリウム","ガリウム","ゲルマニウム","アンチモン","タングステン"
+  ]},
+  {id:"이란",     icon:"🇮🇷", color:"#831843", kw:["이란","테헤란","이란 제재","이란 공습","페르시아만","iran","tehran","persian gulf"]},
+];
+
+let CATS = loadCategories();
+
+function loadCategories(){
+  try{
+    const s = localStorage.getItem("mradar_cats_v1");
+    if(s) return JSON.parse(s);
+  }catch(_){}
+  return JSON.parse(JSON.stringify(DEFAULT_CATS));
+}
+function saveCategories(){
+  try{ localStorage.setItem("mradar_cats_v1", JSON.stringify(CATS)); }catch(_){}
+}
+function resetCategories(){
+  if(!confirm("카테고리·키워드를 기본값으로 복원하시겠습니까?")) return;
+  CATS = JSON.parse(JSON.stringify(DEFAULT_CATS));
+  saveCategories(); renderKwModal();
+}
+
+// ═══════════════════════════════════
+// SECTION 2 : RSS 소스 + Reliability 등급 (38개)
+// ═══════════════════════════════════
+const SOURCES = [
+  {name:"연합뉴스",  url:"https://www.yonhapnews.co.kr/rss/allheadlines.xml", grade:"A"},
+  {name:"KBS",      url:"https://news.kbs.co.kr/rss/rss.do?source=news",     grade:"A"},
+  {name:"MBC",      url:"https://imnews.imbc.com/rss/news/news_00.xml",      grade:"B"},
+  {name:"SBS",      url:"https://news.sbs.co.kr/news/SBSNewsRSS.do?pmd=G",   grade:"B"},
+  {name:"JTBC",     url:"https://fs.jtbc.co.kr/RSS/newsflash.xml",           grade:"B"},
+  {name:"조선일보",  url:"https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml", grade:"B"},
+  {name:"중앙일보",  url:"https://rss.joins.com/joins_news_list.xml",        grade:"B"},
+  {name:"한국경제",  url:"https://www.hankyung.com/feed/all-news",           grade:"B"},
+  {name:"매일경제",  url:"https://www.mk.co.kr/rss/30000001/",               grade:"B"},
+  {name:"YTN",      url:"https://www.ytn.co.kr/rss/rss.php?id=01",           grade:"B"},
+  {name:"전자신문",  url:"http://rss.etnews.co.kr/Section901.xml",           grade:"A"},
+  {name:"경향신문",  url:"https://www.khan.co.kr/rss/rssdata/total_news.xml",grade:"B"},
+  {name:"헤럴드경제",url:"http://biz.heraldcorp.com/common/rss_xml.php?ct=010000000000", grade:"B"},
+  {name:"Reuters",   url:"https://feeds.reuters.com/reuters/topNews",        grade:"A"},
+  {name:"BBC",       url:"https://feeds.bbci.co.uk/news/world/rss.xml",      grade:"A"},
+  {name:"AP News",   url:"https://rsshub.app/apnews/topics/ap-top-news",     grade:"A"},
+  {name:"Al Jazeera",url:"https://www.aljazeera.com/xml/rss/all.xml",        grade:"B"},
+  {name:"CNN",       url:"http://rss.cnn.com/rss/edition_world.rss",         grade:"B"},
+  {name:"Guardian",  url:"https://www.theguardian.com/world/rss",            grade:"B"},
+  {name:"DW",        url:"https://rss.dw.com/rdf/rss-en-all",                grade:"B"},
+  {name:"CNBC",      url:"https://www.cnbc.com/id/100727362/device/rss/rss.html", grade:"B"},
+  {name:"新华社",    url:"https://rsshub.app/xinhua/world",                  grade:"C"},
+  {name:"人民日报",  url:"https://rsshub.app/peopledaily/world",             grade:"C"},
+  {name:"CGTN",     url:"https://www.cgtn.com/rss/news.xml",                grade:"C"},
+  {name:"SCMP",     url:"https://www.scmp.com/rss/91/feed",                 grade:"B"},
+  {name:"Global Times", url:"https://www.globaltimes.cn/rss/outbrain.xml",  grade:"C"},
+  {name:"中央通訊社",url:"https://rsshub.app/cna/aall",                      grade:"B"},
+  {name:"DIGITIMES", url:"https://www.digitimes.com/rss/daily_news_rss.xml",grade:"A"},
+  {name:"NHK",       url:"https://www3.nhk.or.jp/rss/news/cat0.xml",        grade:"A"},
+  {name:"朝日新聞",  url:"https://rsshub.app/asahi/topics/0",                grade:"A"},
+  {name:"読売新聞",  url:"https://rsshub.app/yomiuri/top",                   grade:"A"},
+  {name:"毎日新聞",  url:"https://rsshub.app/mainichi/articles/flash",       grade:"B"},
+  {name:"日本経済新聞", url:"https://www.nikkei.com/rss/news.rdf",           grade:"A"},
+  {name:"産経新聞",  url:"https://rsshub.app/sankei/flash",                  grade:"B"},
+  {name:"共同通信",  url:"https://rsshub.app/kyodonews/main",                grade:"A"},
+  {name:"TBS News", url:"https://newsdig.tbs.co.jp/rss",                    grade:"B"},
+  {name:"Yahoo!JP", url:"https://news.yahoo.co.jp/rss/topics/top-picks.xml",grade:"C"},
+  {name:"Middle East Eye", url:"https://www.middleeasteye.net/rss",         grade:"B"},
+];
+
+// ═══════════════════════════════════
+// SECTION 3 : 공식 API (교차검증)
+// ═══════════════════════════════════
+const OFFICIAL_APIS = [
+  {name:"USGS Earthquake", type:"earthquake", url:"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.atom", grade:"A", description:"USGS 공식 지진 데이터 (Mw 4.5+)"},
+  {name:"JMA 일본기상청", type:"earthquake", url:"https://www.jma.go.jp/bosai/quake/data/list.json", grade:"A", description:"일본 기상청 지진 정보"},
+  {name:"NOAA Tsunami", type:"tsunami", url:"https://www.tsunami.gov/events/xml/PAAQAtom.xml", grade:"A", description:"NOAA Pacific Tsunami Warning"},
+];
+
+// ═══════════════════════════════════
+// SECTION 4 : Material × Region 매트릭스
+// ═══════════════════════════════════
+const MATERIALS = ["Photo","Chemical","CMP","Gas","Precursor","Wafer","Target"];
+
+const REGIONS = [
+  {id:"JP", name:"일본", keywords:["일본","japan","東京","大阪","tokyo","osaka","kyushu","규슈","도호쿠","tohoku","sanriku","산리쿠","hokkaido","홋카이도","후쿠시마","fukushima","미야기","이와테"]},
+  {id:"KR", name:"한국", keywords:["한국","korea","seoul","서울","울산","ulsan","청주","cheongju","평택","pyeongtaek","구미","gumi","이천","icheon"]},
+  {id:"CN", name:"중국", keywords:["중국","china","상하이","shanghai","베이징","beijing","대련","dalian","우시","wuxi","광저우","guangzhou","쓰촨","sichuan"]},
+  {id:"TW", name:"대만", keywords:["대만","taiwan","臺灣","台湾","타이베이","taipei","신주","hsinchu"]},
+  {id:"US", name:"미국", keywords:["미국","usa","united states","america","texas","arizona","caldera","오하이오","ohio"]},
+  {id:"EU", name:"유럽", keywords:["독일","germany","네덜란드","netherlands","france","europe","유럽","bavaria","rotterdam"]},
+  {id:"ME", name:"중동", keywords:["호르무즈","hormuz","페르시아","persian","이란","iran","사우디","saudi","oman","오만","미들이스트","middle east","이라크","iraq","터키","turkey"]},
+];
+
+const MATERIAL_REGION_WEIGHT = {
+  Photo:     {JP:1.0, KR:0.7, US:0.4, EU:0.3, CN:0.2, TW:0.1, ME:0.1},
+  Chemical:  {KR:1.0, JP:0.7, CN:0.6, US:0.4, EU:0.3, TW:0.2, ME:0.2},
+  CMP:       {US:0.9, KR:0.9, JP:0.7, EU:0.3, CN:0.3, TW:0.2, ME:0.1},
+  Gas:       {US:1.0, JP:0.9, KR:0.6, EU:0.5, CN:0.3, TW:0.2, ME:0.4},
+  Precursor: {KR:0.8, JP:0.8, US:0.7, EU:0.4, CN:0.3, TW:0.2, ME:0.1},
+  Wafer:     {JP:1.0, TW:0.6, KR:0.4, US:0.4, EU:0.3, CN:0.3, ME:0.1},
+  Target:    {US:0.9, JP:0.7, EU:0.5, KR:0.4, CN:0.3, TW:0.2, ME:0.1},
+};
+
+// ═══════════════════════════════════
+// SECTION 5 : Risk Score 100점 룰
+// ═══════════════════════════════════
+function computeRiskScore(item){
+  const sevMap = {high:25, medium:15, low:8};
+  const sev = sevMap[item.severity] || 8;
+
+  const regionsHit = detectRegions(item.title + " " + (item.desc||""));
+  let regionScore = 0;
+  if(regionsHit.length > 0){
+    const priority = {JP:25, KR:25, CN:23, TW:22, US:22, ME:20, EU:12};
+    regionScore = Math.max(...regionsHit.map(r => priority[r] || 5));
+  } else {
+    regionScore = 5;
+  }
+
+  const matsHit = item.affectedMaterials || [];
+  let matScore = 0;
+  if(matsHit.length > 0){
+    const priority = {Photo:20, Gas:20, Chemical:17, CMP:15, Precursor:13, Wafer:12, Target:10};
+    matScore = Math.max(...matsHit.map(m => priority[m] || 8));
+    if(matsHit.length >= 3) matScore = Math.min(20, matScore + 3);
+  } else {
+    matScore = 5;
+  }
+
+  const grade = (SOURCES.find(s => s.name === item.source) || {}).grade || "C";
+  const relMap = {A:15, B:10, C:5, D:2};
+  const relScore = relMap[grade] || 5;
+
+  let recScore = 5;
+  if(item.pubDate){
+    const ageHr = (Date.now() - new Date(item.pubDate).getTime()) / 3600000;
+    if(isFinite(ageHr)){
+      if(ageHr < 6) recScore = 15;
+      else if(ageHr < 24) recScore = 10;
+      else if(ageHr < 72) recScore = 5;
+      else recScore = 2;
+    }
+  }
+  if(item.officialVerified) recScore = Math.min(15, recScore + 3);
+
+  const total = sev + regionScore + matScore + relScore + recScore;
+  return {
+    total: Math.min(100, Math.round(total)),
+    breakdown: {sev, region:regionScore, mat:matScore, rel:relScore, rec:recScore},
+    grade,
+    regions: regionsHit,
+  };
+}
+
+function riskLevel(score){
+  if(score >= 80) return "crit";
+  if(score >= 60) return "high";
+  if(score >= 40) return "watch";
+  return "info";
+}
+function riskLabel(lvl){
+  return {crit:"Critical", high:"High", watch:"Watch", info:"Info"}[lvl] || "Info";
+}
+
+function detectRegions(text){
+  const t = (text || "").toLowerCase();
+  const hits = [];
+  for(const r of REGIONS){
+    if(r.keywords.some(k => t.includes(k.toLowerCase()))) hits.push(r.id);
+  }
+  return hits;
+}
+
+function confidenceMarker(item){
+  const grade = (SOURCES.find(s => s.name === item.source) || {}).grade || "C";
+  if(item.officialVerified) return {mark:"●", level:"high", label:"공식"};
+  if(item.aiVerified && (grade === "A")) return {mark:"●", level:"high", label:"공식"};
+  if(item.aiVerified && (grade === "B")) return {mark:"◐", level:"mid", label:"통설"};
+  return {mark:"○", level:"low", label:"추정"};
+}
+
+// ═══════════════════ END SECTION 1~5 ═══════════════════
+
 
 
 
@@ -1619,7 +1846,7 @@ function renderInfoModal(){
     </div>
 
     <div style="background:var(--bg-dark);color:var(--tx-inv);padding:16px 20px;border-radius:8px;margin-bottom:14px;">
-      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin-bottom:4px;">m-RADAR v1.1.3</div>
+      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin-bottom:4px;">m-RADAR v1.1.4</div>
       <div style="font-size:16px;font-weight:800;letter-spacing:.3px;">Material Risk Alert · Detection · Aggregation</div>
       <div style="font-size:10px;color:#999;margin-top:4px;">소재 공급망 외부 리스크 조기감지 시스템</div>
     </div>
@@ -1711,7 +1938,7 @@ function renderInfoModal(){
     </div>
 
     <div style="font-size:9px;color:var(--tx-muted);text-align:center;padding-top:12px;border-top:1px solid var(--bd);margin-top:12px;letter-spacing:.5px;">
-      m-RADAR v1.1.3 · Single Page Build · localStorage Cache · Cloudflare Workers Compatible
+      m-RADAR v1.1.4 · Single Page Build · localStorage Cache · Cloudflare Workers Compatible
     </div>
   `;
 }
